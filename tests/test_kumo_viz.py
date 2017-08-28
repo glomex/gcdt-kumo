@@ -11,7 +11,7 @@ from nose.tools import assert_equal
 import nose
 import pytest
 
-from gcdt.kumo_viz import cfn_viz, _analyze_sg
+from gcdt_kumo.kumo_viz import cfn_viz, _analyze_sg
 from . import here
 
 

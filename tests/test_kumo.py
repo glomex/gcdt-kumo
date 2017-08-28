@@ -7,15 +7,16 @@ from nose.tools import assert_dict_equal
 from nose.tools import assert_equal, assert_true, \
     assert_regexp_matches, assert_list_equal, raises
 import pytest
+from gcdt import GcdtError
 
-from gcdt.kumo_core import _generate_parameters, \
+from gcdt_kumo.kumo_core import _generate_parameters, \
     load_cloudformation_template, write_template_to_file, _get_stack_name, \
     _get_stack_policy, _get_stack_policy_during_update, _get_conf_value, \
     _generate_parameter_entry, _call_hook, generate_template, \
     _get_autoscaling_min_max
-from gcdt.utils import fix_old_kumo_config
-from gcdt.gcdt_config_reader import read_json_config
+from gcdt_kumo.kumo_util import fix_deprecated_kumo_config
 
+from gcdt_testtools.helpers import read_json_config
 from gcdt_testtools.helpers import cleanup_tempfiles, temp_folder  # fixtures!
 from gcdt_testtools.helpers import Bunch
 from . import here
@@ -248,7 +249,7 @@ def test_new_cloudformation_template_hooks():
     template_path = here(
         'resources/simple_cloudformation_stack_hooks/cloudformation.py')
     module, success = load_cloudformation_template(template_path)
-    assert_equal(success, True)
+    assert success
 
     assert module.COUNTER['register'] == 1
     # currently deregister is not called (but we need that later!)
@@ -260,7 +261,7 @@ def test_generate_template_no_arguments():
         here('resources/simple_cloudformation_stack/cloudformation.py')
     )
     context = {}
-    config_simple_stack = fix_old_kumo_config(read_json_config(
+    config_simple_stack = fix_deprecated_kumo_config(read_json_config(
         here('resources/simple_cloudformation_stack/gcdt_dev.json')
     ))['kumo']
     expected_template_body = read_json_config(
@@ -277,7 +278,7 @@ def test_generate_template_with_arguments():
         here('resources/simple_cloudformation_stack/cloudformation_with_arguments.py')
     )
     context = {'foo': 'bar'}
-    config_simple_stack = fix_old_kumo_config(read_json_config(
+    config_simple_stack = fix_deprecated_kumo_config(read_json_config(
         here('resources/simple_cloudformation_stack/gcdt_dev.json')
     ))['kumo']
     expected_template_body = read_json_config(
@@ -294,7 +295,7 @@ def test_generate_template_invalid_arguments():
         here('resources/simple_cloudformation_stack/cloudformation_invalid_arguments.py')
     )
     context = {'foo': 'bar'}
-    config_simple_stack = fix_old_kumo_config(read_json_config(
+    config_simple_stack = fix_deprecated_kumo_config(read_json_config(
         here('resources/simple_cloudformation_stack/gcdt_dev.json')
     ))['kumo']
 

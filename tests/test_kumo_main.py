@@ -4,9 +4,9 @@ import os
 import pytest
 import regex
 
-from gcdt.kumo_main import version_cmd, list_cmd, preview_cmd, dot_cmd, \
+from gcdt_kumo.kumo_main import version_cmd, list_cmd, preview_cmd, dot_cmd, \
     generate_cmd, deploy_cmd, delete_cmd, load_template, start_cmd, stop_cmd
-from gcdt.kumo_core import _get_stack_state
+from gcdt_kumo.kumo_core import _get_stack_state
 
 from gcdt_testtools.helpers_aws import check_preconditions, get_tooldata
 from gcdt_testtools.helpers import check_dot_precondition

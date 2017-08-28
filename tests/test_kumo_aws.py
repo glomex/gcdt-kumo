@@ -6,41 +6,40 @@ from copy import deepcopy
 from nose.tools import assert_equal, assert_false, \
     assert_is_not_none, assert_true
 import pytest
-
 from gcdt import utils
-from gcdt.kumo_core import load_cloudformation_template, \
+from gcdt.utils import are_credentials_still_valid, all_pages
+from gcdt.s3 import prepare_artifacts_bucket, remove_file_from_s3
+from gcdt_testtools.helpers import read_json_config
+from gcdt_testtools.helpers_aws import check_preconditions, create_role_helper
+from gcdt_testtools.helpers_aws import cleanup_buckets, awsclient, \
+    cleanup_roles, temp_cloudformation_policy  # fixtures!
+from gcdt_testtools import helpers
+
+from gcdt_kumo.kumo_core import load_cloudformation_template, \
     get_parameter_diff, deploy_stack, \
     delete_stack, create_change_set, _get_stack_name, describe_change_set, \
     _get_artifact_bucket, _s3_upload, _get_stack_state, delete_change_set, \
     generate_template, wait_for_stack_delete_complete, wait_for_stack_create_complete, \
     wait_for_stack_update_complete, get_stack_id, stop_stack, start_stack, \
     _stop_ec2_instances, _start_ec2_instances
-from gcdt.kumo_util import ensure_ebs_volume_tags_ec2_instance, \
-    ensure_ebs_volume_tags_autoscaling_group
-from gcdt.utils import are_credentials_still_valid, fix_old_kumo_config, all_pages
+from gcdt_kumo.kumo_util import ensure_ebs_volume_tags_ec2_instance, \
+    ensure_ebs_volume_tags_autoscaling_group, fix_deprecated_kumo_config
 from gcdt.servicediscovery import get_outputs_for_stack
-from gcdt.s3 import prepare_artifacts_bucket, remove_file_from_s3
-from gcdt.gcdt_config_reader import read_json_config
-
-from gcdt_testtools.helpers_aws import check_preconditions, create_role_helper
-from gcdt_testtools.helpers_aws import cleanup_buckets, awsclient, \
-    cleanup_roles, temp_cloudformation_policy  # fixtures!
-from gcdt_testtools import helpers
 
 from . import here
 
 
 # read template and config
-config_simple_stack = fix_old_kumo_config(read_json_config(
+config_simple_stack = fix_deprecated_kumo_config(read_json_config(
     here('resources/simple_cloudformation_stack/gcdt_dev.json')
 ))['kumo']
 
 # all things are hardcoded here :(
-config_ec2 = fix_old_kumo_config(read_json_config(
+config_ec2 = fix_deprecated_kumo_config(read_json_config(
     here('resources/sample_ec2_cloudformation_stack/gcdt_dev.json')
 ))['kumo']
 
-config_autoscaling = fix_old_kumo_config(read_json_config(
+config_autoscaling = fix_deprecated_kumo_config(read_json_config(
     here('resources/sample_autoscaling_cloudformation_stack/gcdt_dev.json')
 ))['kumo']
 
@@ -151,7 +150,7 @@ def sample_cloudformation_stack_with_hooks(awsclient):
     cloudformation_stack, _ = load_cloudformation_template(
         here('resources/sample_cloudformation_stack_with_hooks/cloudformation.py')
     )
-    config_stack = fix_old_kumo_config(read_json_config(
+    config_stack = fix_deprecated_kumo_config(read_json_config(
         here('resources/sample_cloudformation_stack_with_hooks/gcdt_dev.json')
     ))['kumo']
     exit_code = deploy_stack(awsclient, {}, config_stack,

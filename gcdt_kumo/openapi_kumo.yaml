@@ -1,0 +1,103 @@
+swagger: '2.0'
+info:
+  title: kumo config
+  description: Documentation of the config file format for `kumo` (a gcdt tool).
+  version: 0.2.2
+
+paths:
+  /test:
+    get:
+      responses:
+        "200":
+          description:  success
+
+definitions:
+  kumo:
+    description: 'The kumo config is organized into the following structure:'
+    type: object
+    properties:
+      stack:
+        description: 'configure stack details'
+        $ref: '#/definitions/stack'
+      parameters:
+        description: 'parameters used in the cloudformation template'
+        $ref: '#/definitions/parameters'
+      deployment:
+        description: 'details regarding the deployment phase of the stack'
+        $ref: '#/definitions/deployment'
+      defaults:
+        description: 'finetune gcdt tool lifecycle (override at own risk)'
+        $ref: '#/definitions/defaults'
+    required:
+    - defaults
+    - stack
+  stack:
+    type: object
+    description: 'Use the `stack` section to configure stack details.'
+    properties:
+      StackName:
+        type: string
+        description: 'name of your cloudformation stack'
+        example: team-dev-my-application-stack
+      RoleARN:
+        type: string
+        description: 'role to use for cloudformation deployment'
+        example: arn:aws:iam::<AccountID>:role/<CloudFormationRoleName>
+        $ref: '#/definitions/arn'
+      NotificationARNs:
+        description: 'configure SNS recipients for stack events'
+        $ref: '#/definitions/NotificationARNs'
+      artifactBucket:
+        description: 's3 bucket use to upload the cloudformation template to AWS'
+        $ref: '#/definitions/arn'
+      TemplateBody:
+        type: string
+        example: value3
+    required:
+    - StackName
+    additionalProperties: false
+  parameters:
+    type: object
+    description: 'AWS cloudformation parameters. Parameters in the config must match the parameters used in the template!'
+    additionalProperties: true
+  deployment:
+    type: object
+    description: 'Stack properties specific to the deployment phase.'
+    properties:
+      DisableStop:
+        type: boolean
+        description: 'disable the kumo stop & start mechanism for this stack.'
+        example: true
+    additionalProperties: false
+  defaults:
+    type: object
+    description: 'Default properties to finetune gcdt tool lifecycle (override at own risk).'
+    properties:
+      non_config_commands:
+        type: array
+        description: 'kumo commands that do not require a config file.'
+        default: ['list']
+        items:
+          type: string
+      validate:
+        type: boolean
+        description: 'validate the tool configuration against openapi spec.'
+        default: true
+    required:
+    - non_config_commands
+    - validate
+    additionalProperties: false
+  top:
+    type: object
+    properties:
+      kumo:
+        $ref: '#/definitions/kumo'
+  NotificationARNs:
+    type: array
+    items:
+      $ref: '#/definitions/arn'
+      example: arn:aws:sns:eu-west-1:123456789012:mytopic1
+  arn:
+    type: string
+    description: '`Amazon Resource Name <http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html>`_'
+    pattern: "arn:aws:([a-zA-Z0-9-])+:([a-z]{2}-[a-z]+-\\d{1})?:(\\d{12})?:(.*)"
