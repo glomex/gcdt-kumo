@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, print_function
-from copy import deepcopy
 
-from gcdt.utils import dict_merge
 from gcdt import gcdt_signals
-from gcdt.gcdt_openapi import get_openapi_defaults, validate_tool_config
+from gcdt.gcdt_openapi import get_openapi_defaults, validate_tool_config, \
+    incept_defaults_helper, validate_config_helper
 
 from .kumo_util import fix_deprecated_kumo_config
 from . import read_openapi
@@ -19,20 +18,28 @@ def incept_defaults(params):
     :param params: context, config (context - the _awsclient, etc..
                    config - The stack details, etc..)
     """
+    incept_defaults_helper(params, read_openapi(), 'kumo')
+
+
+def fix_and_validate_config(params):
+    """validate the config after lookups.
+    :param params: context, config (context - the _awsclient, etc..
+                   config - The stack details, etc..)
+    """
     context, config = params
-    # we need the defaults in all cases (especially if we do not have a config file)
-    defaults = get_openapi_defaults(read_openapi(), 'kumo')
-    if defaults:
-        config_from_reader = deepcopy(config)
-        if context['tool'] == 'kumo':
-            dict_merge(config, {'kumo': defaults})
-        else:
-            # incept only 'defaults' section
-            dict_merge(config, {'kumo': {'defaults': defaults['defaults']}})
+    tool = context['tool']
+    actual_non_config_command = (context['tool'] == tool and context['command'] in
+        config.get(tool, {}).get('defaults', {}).get('non_config_commands', [])
+    )
+    # fix
+    if 'kumo' in config and not actual_non_config_command:
+        # deprecated: migrate old-style "cloudformation" entries
+        fix_deprecated_kumo_config(config)
 
-        dict_merge(config, config_from_reader)
+    validate_config_helper(params, read_openapi(), 'kumo')
 
 
+'''
 def fix_and_validate_config(params):
     """validate the config after lookups.
     :param params: context, config (context - the _awsclient, etc..
@@ -52,6 +59,7 @@ def fix_and_validate_config(params):
         error = validate_tool_config(read_openapi(), config)
         if error:
             context['error'] = error
+'''
 
 
 def register():
