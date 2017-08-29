@@ -121,6 +121,7 @@ def get_parameter_diff(awsclient, config):
     return changed > 0
 
 
+'''
 def call_pre_hook(awsclient, cloudformation):
     """Invoke the pre_hook BEFORE the config is read.
 
@@ -168,6 +169,7 @@ def _call_hook(awsclient, config, stack_name, parameters, cloudformation,
         hook_func(awsclient=awsclient, config=config,
                   parameters=parameters, stack_outputs=stack_outputs,
                   stack_state=stack_state)
+'''
 
 
 def _get_stack_outputs(cfn_client, stack_name):
@@ -324,9 +326,9 @@ def deploy_stack(awsclient, context, conf, cloudformation, override_stack_policy
     # in 'command_finalized' hook
     context['stack_output'] = _get_stack_outputs(
         awsclient.get_client('cloudformation'), stack_name)
-    _call_hook(awsclient, conf, stack_name, parameters, cloudformation,
-               hook='post_hook',
-               message='CloudFormation is done, now executing post hook...')
+    #_call_hook(awsclient, conf, stack_name, parameters, cloudformation,
+    #           hook='post_hook',
+    #           message='CloudFormation is done, now executing post hook...')
     return exit_code
 
 
@@ -405,8 +407,8 @@ def _create_stack(awsclient, context, conf, cloudformation, parameters):
     client_cf = awsclient.get_client('cloudformation')
     stack_name = _get_stack_name(conf)
 
-    _call_hook(awsclient, conf, stack_name, parameters, cloudformation,
-               hook='pre_create_hook')
+    #_call_hook(awsclient, conf, stack_name, parameters, cloudformation,
+    #           hook='pre_create_hook')
 
     request = {
         'Parameters': parameters,
@@ -425,9 +427,9 @@ def _create_stack(awsclient, context, conf, cloudformation, parameters):
     response = client_cf.create_stack(**request)
 
     exit_code = _poll_stack_events(awsclient, stack_name)
-    _call_hook(awsclient, conf, stack_name, parameters, cloudformation,
-               hook='post_create_hook',
-               message='CloudFormation is done, now executing post create hook...')
+    #_call_hook(awsclient, conf, stack_name, parameters, cloudformation,
+    #           hook='post_create_hook',
+    #           message='CloudFormation is done, now executing post create hook...')
     return exit_code
 
 
@@ -459,8 +461,8 @@ def _update_stack(awsclient, context, conf, cloudformation, parameters,
     last_event = _get_stack_events_last_timestamp(awsclient, stack_name)
 
     try:
-        _call_hook(awsclient, conf, stack_name, parameters, cloudformation,
-                   hook='pre_update_hook')
+        #_call_hook(awsclient, conf, stack_name, parameters, cloudformation,
+        #           hook='pre_update_hook')
         request = {
             'Parameters': parameters,
             'Capabilities': ['CAPABILITY_IAM'],
@@ -483,9 +485,9 @@ def _update_stack(awsclient, context, conf, cloudformation, parameters,
         response = client_cf.update_stack(**request)
 
         exit_code = _poll_stack_events(awsclient, stack_name, last_event)
-        _call_hook(awsclient, conf, stack_name, parameters, cloudformation,
-                   hook='post_update_hook',
-                   message='CloudFormation is done, now executing post update hook...')
+        #_call_hook(awsclient, conf, stack_name, parameters, cloudformation,
+        #           hook='post_update_hook',
+        #           message='CloudFormation is done, now executing post update hook...')
     except GracefulExit as e:
         log.info('Received %s signal - cancel cloudformation update for \'%s\'',
                  str(e), stack_name)

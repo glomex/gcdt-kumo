@@ -21,8 +21,8 @@ from gcdt import gcdt_lifecycle
 
 from .kumo_core import get_parameter_diff, delete_stack, \
     deploy_stack, write_template_to_file, list_stacks, create_change_set, \
-    describe_change_set, load_cloudformation_template, call_pre_hook, \
-    generate_template, stop_stack, start_stack
+    describe_change_set, load_cloudformation_template, \
+    generate_template, stop_stack, start_stack  #call_pre_hook
 from .kumo_viz import cfn_viz, svg_output
 
 
@@ -82,7 +82,7 @@ def deploy_cmd(override, **tooldata):
     awsclient = context.get('_awsclient')
 
     cloudformation = load_template()
-    call_pre_hook(awsclient, cloudformation)
+    #call_pre_hook(awsclient, cloudformation)
 
     if get_parameter_diff(awsclient, conf):
         print(colored.red('Parameters have changed. Waiting 10 seconds. \n'))
@@ -151,9 +151,6 @@ def stop_cmd(**tooldata):
     context = tooldata.get('context')
     conf = tooldata.get('config')
     awsclient = context.get('_awsclient')
-
-    #cloudformation = load_template()
-
     exit_code = stop_stack(awsclient, conf)
     return exit_code
 
@@ -163,9 +160,6 @@ def start_cmd(**tooldata):
     context = tooldata.get('context')
     conf = tooldata.get('config')
     awsclient = context.get('_awsclient')
-
-    #cloudformation = load_template()
-
     exit_code = start_stack(awsclient, conf)
     return exit_code
 

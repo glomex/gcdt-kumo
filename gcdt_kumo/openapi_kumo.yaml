@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   title: kumo config
-  description: Documentation of the config file format for `kumo` (a gcdt tool).
+  description: "Documentation of the config file format for `kumo` (a gcdt tool). Note: if you want to add to the documentation please edit the openapi_kumo.yaml file"
   version: 0.2.2
 
 paths:
@@ -81,7 +81,7 @@ definitions:
           type: string
       validate:
         type: boolean
-        description: 'validate the tool configuration against openapi spec.'
+        description: 'use this if you need to switch off config validation.'
         default: true
     required:
     - non_config_commands

@@ -7,13 +7,13 @@ from nose.tools import assert_dict_equal
 from nose.tools import assert_equal, assert_true, \
     assert_regexp_matches, assert_list_equal, raises
 import pytest
-from gcdt import GcdtError
+#from gcdt import GcdtError
 
 from gcdt_kumo.kumo_core import _generate_parameters, \
     load_cloudformation_template, write_template_to_file, _get_stack_name, \
     _get_stack_policy, _get_stack_policy_during_update, _get_conf_value, \
-    _generate_parameter_entry, _call_hook, generate_template, \
-    _get_autoscaling_min_max
+    _generate_parameter_entry, generate_template, \
+    _get_autoscaling_min_max  # _call_hook
 from gcdt_kumo.kumo_util import fix_deprecated_kumo_config
 
 from gcdt_testtools.helpers import read_json_config
@@ -51,8 +51,6 @@ def test_simple_cloudformation_stack():
     # read the template
     template_path = here(
         'resources/simple_cloudformation_stack/cloudformation.py')
-    #config_path = here(
-    #    'resources/simple_cloudformation_stack/settings_dev.conf')
 
     cloudformation, success = load_cloudformation_template(template_path)
     assert_true(success)
@@ -217,6 +215,7 @@ def test_generate_parameter_entry():
                       })
 
 
+'''
 def _create_cfn_with_hook():
     def hook():
         pass
@@ -243,6 +242,7 @@ def test_call_hook_not_present(capsys):
                'pre_create_hook')
     out, err = capsys.readouterr()
     assert out == ''
+'''
 
 
 def test_new_cloudformation_template_hooks():
