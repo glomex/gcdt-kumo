@@ -39,29 +39,6 @@ def fix_and_validate_config(params):
     validate_config_helper(params, read_openapi(), 'kumo')
 
 
-'''
-def fix_and_validate_config(params):
-    """validate the config after lookups.
-    :param params: context, config (context - the _awsclient, etc..
-                   config - The stack details, etc..)
-    """
-    context, config = params
-    validation_switched_on = config.get('defaults', {}).get('validate', True)
-    config_file_req_for_cmd = not(context['command'] not in config.get(
-        'defaults', {}).get('non_config_commands', []))
-    # fix
-    if 'kumo' in config and config_file_req_for_cmd:
-        # deprecated: mograte old-style "cloudformation" entries
-        fix_deprecated_kumo_config(config)
-
-    # validate
-    if validation_switched_on and 'kumo' in config and config_file_req_for_cmd:
-        error = validate_tool_config(read_openapi(), config)
-        if error:
-            context['error'] = error
-'''
-
-
 def register():
     """Please be very specific about when your plugin needs to run and why.
     E.g. run the sample stuff after at the very beginning of the lifecycle
