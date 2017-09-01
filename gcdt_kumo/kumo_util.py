@@ -130,19 +130,22 @@ def ensure_tags_ebs_volume(awsclient, volume, tags):
 
 
 def fix_deprecated_kumo_config(config, silent=False):
-    # DEPRECATED since 0.1.420
+    # 'cloudformation' section is DEPRECATED since 0.1.420
     if config.get('kumo', {}).get('cloudformation', {}):
         if not silent:
             log.warn('kumo config contains a deprecated "cloudformation" section!')
         cloudformation = config['kumo'].pop('cloudformation')
         stack = {}
+        parameters = {}
         for key in cloudformation.keys():
             if key in ['StackName', 'TemplateBody', 'artifactBucket', 'RoleARN']:
-                stack[key] = cloudformation.pop(key)
+                stack[key] = cloudformation[key]
+            else:
+                parameters[key] = cloudformation[key]
         if stack:
             config['kumo']['stack'] = stack
-        if cloudformation:
-            config['kumo']['parameters'] = cloudformation
+        if parameters:
+            config['kumo']['parameters'] = parameters
         if not silent:
             log.warn('Your kumo config should look like this:')
             log.warn(json.dumps(config['kumo']))

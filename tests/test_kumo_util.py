@@ -18,7 +18,7 @@ def test_StackLookup():
     assert vpcid.data == {'Fn::GetAtt': ['StackOutput', 'vpcid']}
 
 
-def test_fix_old_kumo_config():
+def test_fix_deprecated_kumo_config():
     config = {
         'kumo': {
             'cloudformation': {
@@ -42,7 +42,7 @@ def test_fix_old_kumo_config():
     assert config == exp_config
 
 
-def test_fix_old_kumo_config_no_change():
+def test_fix_deprecated_kumo_config_no_change():
     config = {
         'kumo': {
             'stack': {
@@ -68,7 +68,7 @@ def test_fix_old_kumo_config_no_change():
     assert config == exp_config
 
 
-def test_fix_old_kumo_config_no_parameters():
+def test_fix_deprecated_kumo_config_no_parameters():
     config = {
         'kumo': {
             'cloudformation': {
