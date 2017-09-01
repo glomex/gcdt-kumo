@@ -7,8 +7,6 @@ try:
 except ImportError:
     from io import StringIO
 
-from nose.tools import assert_equal
-import nose
 import pytest
 
 from gcdt_kumo.kumo_viz import cfn_viz, _analyze_sg
@@ -67,5 +65,5 @@ def test_analyze_sg():
         template = json.loads(tfile.read(), object_pairs_hook=OrderedDict)
 
     known_sg, open_sg = _analyze_sg(template['Resources'])
-    nose.tools.assert_in('InstanceSecurityGroup', known_sg)
-    nose.tools.assert_in('InstanceSecurityGroup', open_sg)
+    assert 'InstanceSecurityGroup' in known_sg
+    assert 'InstanceSecurityGroup' in open_sg

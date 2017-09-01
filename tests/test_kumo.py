@@ -3,11 +3,7 @@ from __future__ import unicode_literals, print_function
 import json
 from tempfile import NamedTemporaryFile
 
-from nose.tools import assert_dict_equal
-from nose.tools import assert_equal, assert_true, \
-    assert_regexp_matches, assert_list_equal, raises
 import pytest
-#from gcdt import GcdtError
 
 from gcdt_kumo.kumo_core import _generate_parameters, \
     load_cloudformation_template, write_template_to_file, _get_stack_name, \
@@ -16,6 +12,7 @@ from gcdt_kumo.kumo_core import _generate_parameters, \
     _get_autoscaling_min_max  # _call_hook
 from gcdt_kumo.kumo_util import fix_deprecated_kumo_config
 
+from gcdt_testtools.helpers import assert_regexp_matches
 from gcdt_testtools.helpers import read_json_config
 from gcdt_testtools.helpers import cleanup_tempfiles, temp_folder  # fixtures!
 from gcdt_testtools.helpers import Bunch
@@ -28,14 +25,14 @@ def test_load_cloudformation_template(cleanup_tempfiles):
     cleanup_tempfiles.append(tf.name)
 
     module, success = load_cloudformation_template(tf.name)
-    assert_equal(success, True)
-    assert_equal(module.plus(1, 2), 3)
+    assert success
+    assert module.plus(1, 2) == 3
 
 
 def test_cloudformation_template_not_available():
     module, success = load_cloudformation_template()
-    assert_equal(module, None)
-    assert_equal(success, False)
+    assert module is None
+    assert not success
 
 
 def test_load_cloudformation_template_from_cwd(temp_folder):
@@ -43,8 +40,8 @@ def test_load_cloudformation_template_from_cwd(temp_folder):
     open('cloudformation.py', 'w').write('def plus(a, b):\n    return a+b\n')
 
     module, success = load_cloudformation_template()
-    assert_true(success, True)
-    assert_equal(module.plus(1, 2), 3)
+    assert success
+    assert module.plus(1, 2) ==  3
 
 
 def test_simple_cloudformation_stack():
@@ -53,7 +50,7 @@ def test_simple_cloudformation_stack():
         'resources/simple_cloudformation_stack/cloudformation.py')
 
     cloudformation, success = load_cloudformation_template(template_path)
-    assert_true(success)
+    assert success
 
     config = {
         'stack': {
@@ -67,7 +64,7 @@ def test_simple_cloudformation_stack():
     expected_templ_file_name = '%s-generated-cf-template.json' % \
                                _get_stack_name(config)
     actual = write_template_to_file(config, generate_template({}, config, cloudformation))
-    assert_equal(actual, expected_templ_file_name)
+    assert actual == expected_templ_file_name
 
 
 def _create_simple_cf():
@@ -90,7 +87,7 @@ def test_simple_cloudformation_stack_custom():
     cf = _create_simple_cf()
     cf.get_stack_policy = gsp
     stack_policy = _get_stack_policy(cf)
-    assert_equal(stack_policy, 'have indiv. policy')
+    assert stack_policy == 'have indiv. policy'
 
 
 def test_simple_cloudformation_stack_during_update_custom():
@@ -99,7 +96,7 @@ def test_simple_cloudformation_stack_during_update_custom():
     cf = _create_simple_cf()
     cf.get_stack_policy_during_update = gsp
     stack_policy = _get_stack_policy_during_update(cf, False)
-    assert_equal(stack_policy, 'have indiv. policy')
+    assert stack_policy == 'have indiv. policy'
 
 
 def test_simple_cloudformation_stack_during_update_override_custom():
@@ -109,16 +106,16 @@ def test_simple_cloudformation_stack_during_update_override_custom():
     cf = _create_simple_cf()
     cf.get_stack_policy_during_update = gsp
     stack_policy = _get_stack_policy_during_update(cf, True)
-    assert_equal(stack_policy, 'have indiv. policy')
+    assert stack_policy == 'have indiv. policy'
 
 
 def test_simple_cloudformation_stack_during_update_default():
     cf = _create_simple_cf()
     stack_policy = _get_stack_policy_during_update(cf, False)
     assert_regexp_matches(stack_policy, '{"Statement":')
-    assert_equal('Deny', json.loads(stack_policy)['Statement'][1]['Effect'])
-    assert_list_equal(["Update:Replace", "Update:Delete"],
-                      json.loads(stack_policy)['Statement'][1]['Action'])
+    assert json.loads(stack_policy)['Statement'][1]['Effect'] == 'Deny'
+    assert json.loads(stack_policy)['Statement'][1]['Action'] == [
+        "Update:Replace", "Update:Delete"]
 
 
 def test_simple_cloudformation_stack_during_update_override_default():
@@ -148,7 +145,7 @@ def test_parameter_substitution():
     }
 
     converted_conf = _generate_parameters(conf)
-    assert_equal(converted_conf, expected)
+    assert converted_conf == expected
 
 
 def test_parameter_substitution_reserved_terms():
@@ -170,7 +167,7 @@ def test_parameter_substitution_reserved_terms():
         }
     ]
     converted_conf = _generate_parameters(conf)
-    assert_equal(converted_conf, expected)
+    assert converted_conf == expected
 
 
 def test_get_conf_value():
@@ -179,7 +176,7 @@ def test_get_conf_value():
             'ConfigOne': 'value1'
         }
     }
-    assert_equal(_get_conf_value(config, 'ConfigOne'), 'value1')
+    assert _get_conf_value(config, 'ConfigOne') == 'value1'
 
 
 def test_get_conf_value_list():
@@ -188,17 +185,18 @@ def test_get_conf_value_list():
             'ConfigOne': ['a', 'b', 'c']
         }
     }
-    assert_equal(_get_conf_value(config, 'ConfigOne'), 'a,b,c')
+    assert _get_conf_value(config, 'ConfigOne') == 'a,b,c'
 
 
-@raises(KeyError)
+#@raises(KeyError)
 def test_get_conf_value_unknown():
     config = {
         'parameters': {
             'ConfigOne': ['a', 'b', 'c']
         }
     }
-    _get_conf_value(config, 'Unknown')
+    with pytest.raises(KeyError):
+        _get_conf_value(config, 'Unknown')
 
 
 def test_generate_parameter_entry():
@@ -207,12 +205,11 @@ def test_generate_parameter_entry():
             'ConfigOne': 'value1'
         }
     }
-    assert_dict_equal(_generate_parameter_entry(config, 'ConfigOne'),
-                      {
-                          'ParameterKey': 'ConfigOne',
-                          'ParameterValue': 'value1',
-                          'UsePreviousValue': False
-                      })
+    assert _generate_parameter_entry(config, 'ConfigOne') == {
+        'ParameterKey': 'ConfigOne',
+        'ParameterValue': 'value1',
+        'UsePreviousValue': False
+    }
 
 
 '''

@@ -3,12 +3,11 @@ from __future__ import unicode_literals, print_function
 import os
 from copy import deepcopy
 
-from nose.tools import assert_equal, assert_false, \
-    assert_is_not_none, assert_true
 import pytest
 from gcdt import utils
 from gcdt.utils import are_credentials_still_valid, all_pages
 from gcdt.s3 import prepare_artifacts_bucket, remove_file_from_s3
+from gcdt.servicediscovery import get_outputs_for_stack
 from gcdt_testtools.helpers import read_json_config
 from gcdt_testtools.helpers_aws import check_preconditions, create_role_helper
 from gcdt_testtools.helpers_aws import cleanup_buckets, awsclient, \
@@ -24,7 +23,6 @@ from gcdt_kumo.kumo_core import load_cloudformation_template, \
     _stop_ec2_instances, _start_ec2_instances
 from gcdt_kumo.kumo_util import ensure_ebs_volume_tags_ec2_instance, \
     ensure_ebs_volume_tags_autoscaling_group, fix_deprecated_kumo_config
-from gcdt.servicediscovery import get_outputs_for_stack
 
 from . import here
 
@@ -218,7 +216,7 @@ def cleanup_stack_simple_stack(awsclient):
     # cleanup
     exit_code = delete_stack(awsclient, config_simple_stack)
     # check whether delete was completed!
-    assert_false(exit_code, 'delete_stack was not completed\n' +
+    assert not exit_code, ('delete_stack was not completed\n' +
                  'please make sure to clean up the stack manually')
 
 
@@ -231,7 +229,7 @@ def cleanup_stack_autoscaling(awsclient):
     # cleanup
     exit_code = delete_stack(awsclient, config_autoscaling)
     # check whether delete was completed!
-    assert_false(exit_code, 'delete_stack was not completed\n' +
+    assert not exit_code, ('delete_stack was not completed\n' +
                  'please make sure to clean up the stack manually')
 
 
@@ -244,7 +242,7 @@ def cleanup_stack_ec2(awsclient):
     # cleanup
     exit_code = delete_stack(awsclient, config_ec2)
     # check whether delete was completed!
-    assert_false(exit_code, 'delete_stack was not completed\n' +
+    assert not exit_code, ('delete_stack was not completed\n' +
                  'please make sure to clean up the stack manually')
 
 
@@ -286,11 +284,11 @@ def test_kumo_utils_ensure_autoscaling_ebs_tags(cleanup_stack_autoscaling,
     exit_code = deploy_stack(awsclient, {}, config_autoscaling,
                              cloudformation_autoscaling,
                              override_stack_policy=False)
-    assert_equal(exit_code, 0)
+    assert exit_code == 0
     stack_name = _get_stack_name(config_autoscaling)
     stack_output = get_outputs_for_stack(awsclient, stack_name)
     as_group_name = stack_output.get('AutoScalingGroupName', None)
-    assert_is_not_none(as_group_name)
+    assert as_group_name is not None
     tags_v1 = [{'Key': 'kumo-test', 'Value': 'version1'}]
     ensure_ebs_volume_tags_autoscaling_group(awsclient, as_group_name,
                                              tags_v1)
@@ -324,9 +322,9 @@ def test_kumo_utils_ensure_autoscaling_ebs_tags(cleanup_stack_autoscaling,
             ])
             for vol in volumes['Volumes']:
                 for tag in tags_v2:
-                    assert_true(check_volume_tagged(vol, tag))
+                    assert check_volume_tagged(vol, tag)
                 for tag in tags_v1:
-                    assert_false(check_volume_tagged(vol, tag))
+                    assert not check_volume_tagged(vol, tag)
 
 
 @pytest.mark.aws
@@ -338,12 +336,12 @@ def test_kumo_utils_ensure_ebs_tags(cleanup_stack_ec2, awsclient):
     )
     exit_code = deploy_stack(awsclient, {}, config_ec2, cloudformation_ec2,
                              override_stack_policy=False)
-    assert_equal(exit_code, 0)
+    assert exit_code == 0
 
     stack_name = _get_stack_name(config_ec2)
     stack_output = get_outputs_for_stack(awsclient, stack_name)
     instance_id = stack_output.get('InstanceId', None)
-    assert_is_not_none(instance_id)
+    assert instance_id is not None
     tags = [{'Key': 'kumo-test', 'Value': 'Success'}]
     ensure_ebs_volume_tags_ec2_instance(awsclient, instance_id, tags)
     client_ec2 = awsclient.get_client('ec2')
@@ -355,7 +353,7 @@ def test_kumo_utils_ensure_ebs_tags(cleanup_stack_ec2, awsclient):
     ])
     for vol in volumes['Volumes']:
         for tag in tags:
-            assert_true(check_volume_tagged(vol, tag))
+            assert check_volume_tagged(vol, tag)
 
 
 def check_volume_tagged(vol, tag):

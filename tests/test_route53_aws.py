@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, print_function
-from nose.tools import assert_equal
-from troposphere.ec2 import Instance
 
+from troposphere.ec2 import Instance
 import pytest
 from gcdt_kumo import route53
 
@@ -21,15 +20,15 @@ def test_create_record_with_given_hostname(awsclient):
     )
 
     # Compare HostedZoneName
-    assert_equal(result_record.HostedZoneName, 'TEST.HOST.ZONE.')
+    assert result_record.HostedZoneName == 'TEST.HOST.ZONE.'
     # Compare Name : DNS name used as URL later on
-    assert_equal(result_record.Name.data, {'Fn::Join': ['', ['TESTPREFIX.', 'TEST.HOST.ZONE.']]})
+    assert result_record.Name.data == {'Fn::Join': ['', ['TESTPREFIX.', 'TEST.HOST.ZONE.']]}
     # Compare ResourceRecords : The target for the route
-    assert_equal(result_record.ResourceRecords, ['120.0.0.1'])
+    assert result_record.ResourceRecords == ['120.0.0.1']
     # Compare Type : The default should be 'A'
-    assert_equal(result_record.Type, 'A')
+    assert result_record.Type == 'A'
     # Compare TTL
-    assert_equal(result_record.TTL, route53.TTL_DEFAULT)
+    assert result_record.TTL == route53.TTL_DEFAULT
 
 
 @pytest.mark.aws
@@ -45,15 +44,15 @@ def test_create_record_with_given_hostname_cname(awsclient):
     )
 
     # Compare HostedZoneName
-    assert_equal(result_record.HostedZoneName, 'TEST.HOST.ZONE.')
+    assert result_record.HostedZoneName == 'TEST.HOST.ZONE.'
     # Compare Name : DNS name used as URL later on
-    assert_equal(result_record.Name.data, {'Fn::Join': ['', ['TESTPREFIX.', 'TEST.HOST.ZONE.']]})
+    assert result_record.Name.data == {'Fn::Join': ['', ['TESTPREFIX.', 'TEST.HOST.ZONE.']]}
     # Compare ResourceRecords : The target for the route
-    assert_equal(result_record.ResourceRecords, ['120.0.0.1'])
+    assert result_record.ResourceRecords == ['120.0.0.1']
     # Compare Type
-    assert_equal(result_record.Type, 'CNAME')
+    assert result_record.Type == 'CNAME'
     # Compare TTL
-    assert_equal(result_record.TTL, route53.TTL_DEFAULT)
+    assert result_record.TTL == route53.TTL_DEFAULT
 
 
 def test_create_record_with_given_hostname_target_instance():
@@ -68,15 +67,15 @@ def test_create_record_with_given_hostname_target_instance():
     )
 
     # Compare HostedZoneName
-    assert_equal(result_record.HostedZoneName, 'TEST.HOST.ZONE.')
+    assert result_record.HostedZoneName == 'TEST.HOST.ZONE.'
     # Compare Name : DNS name used as URL later on
-    assert_equal(result_record.Name.data, {'Fn::Join': ['', ['TESTPREFIX.', 'TEST.HOST.ZONE.']]})
+    assert result_record.Name.data == {'Fn::Join': ['', ['TESTPREFIX.', 'TEST.HOST.ZONE.']]}
     # Compare ResourceRecords : The target for the route
-    assert_equal(result_record.ResourceRecords[0].data, {'Fn::GetAtt': ['testEC2', 'PrivateIp']})
+    assert result_record.ResourceRecords[0].data == {'Fn::GetAtt': ['testEC2', 'PrivateIp']}
     # Compare Type
-    assert_equal(result_record.Type, 'A')
+    assert result_record.Type== 'A'
     # Compare TTL
-    assert_equal(result_record.TTL, route53.TTL_DEFAULT)
+    assert result_record.TTL == route53.TTL_DEFAULT
 
 
 @pytest.mark.aws
