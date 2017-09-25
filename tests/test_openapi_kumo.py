@@ -21,7 +21,6 @@ def test_scaffolding_default():
 def test_scaffolding_sample_min():
     spec = read_openapi()
     expected_sample = {
-        'defaults': {'non_config_commands': ['list'], 'validate': True},
         'stack': {'StackName': 'team-dev-my-application-stack'}
     }
 

@@ -24,6 +24,7 @@ from gcdt import GcdtError
 
 
 log = getLogger(__name__)
+DEFAULT_CAPABILITIES = ['CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM']
 
 
 def load_cloudformation_template(path=None):
@@ -412,7 +413,7 @@ def _create_stack(awsclient, context, conf, cloudformation, parameters):
 
     request = {
         'Parameters': parameters,
-        'Capabilities': ['CAPABILITY_IAM'],
+        'Capabilities': DEFAULT_CAPABILITIES,
         'StackPolicyBody': _get_stack_policy(cloudformation)
     }
     dict_selective_merge(request, conf['stack'],
@@ -465,7 +466,7 @@ def _update_stack(awsclient, context, conf, cloudformation, parameters,
         #           hook='pre_update_hook')
         request = {
             'Parameters': parameters,
-            'Capabilities': ['CAPABILITY_IAM'],
+            'Capabilities': DEFAULT_CAPABILITIES,
             'StackPolicyBody': _get_stack_policy(cloudformation),
             'StackPolicyDuringUpdateBody': _get_stack_policy_during_update(
                 cloudformation, override_stack_policy),
@@ -582,7 +583,7 @@ def create_change_set(awsclient, context, conf, cloudformation):
     request = {
         'TemplateBody': generate_template(context, conf, cloudformation),
         'Parameters': _generate_parameters(conf),
-        'Capabilities': ['CAPABILITY_IAM'],
+        'Capabilities': DEFAULT_CAPABILITIES,
         'ChangeSetName': change_set_name,
         'ChangeSetType': change_set_type
     }
