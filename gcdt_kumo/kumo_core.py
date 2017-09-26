@@ -17,10 +17,10 @@ from tabulate import tabulate
 from gcdt.gcdt_logging import getLogger
 from gcdt.utils import GracefulExit, json2table, dict_selective_merge, all_pages, \
     get_env, stack_exists
-from gcdt.gcdt_signals import check_hook_mechanism_is_intact, \
-    check_register_present
+#from gcdt.gcdt_signals import check_hook_mechanism_is_intact, \
+#    check_register_present
 from gcdt.s3 import upload_file_to_s3
-from gcdt import GcdtError
+#from gcdt import GcdtError
 
 
 log = getLogger(__name__)
@@ -45,15 +45,15 @@ def load_cloudformation_template(path=None):
             cloudformation = imp.load_source('cloudformation', path)
             sys.path = sp  # restore
             # use cfn template hooks
-            if not check_hook_mechanism_is_intact(cloudformation):
-                # no hooks - do nothing
-                log.debug(
-                    'No valid hook configuration: \'%s\'. Not using hooks!',
-                    path)
-            else:
-                if check_register_present(cloudformation):
-                    # register the template hooks so they listen to gcdt_signals
-                    cloudformation.register()
+            #if not check_hook_mechanism_is_intact(cloudformation):
+            #    # no hooks - do nothing
+            #    log.debug(
+            #        'No valid hook configuration: \'%s\'. Not using hooks!',
+            #        path)
+            #else:
+            #    if check_register_present(cloudformation):
+            #        # register the template hooks so they listen to gcdt_signals
+            #        cloudformation.register()
             return cloudformation, True
         except GracefulExit:
             raise

@@ -110,3 +110,8 @@ def test_basic_lifecycle_cmds(awsclient, simple_cloudformation_stack_folder):
     assert delete_cmd(True, **tooldata) == 0
     assert _get_stack_state(awsclient.get_client('cloudformation'),
                             'infra-dev-kumo-sample-stack') is None
+
+
+def test_lifecycle_hooks():
+    # TODO
+    assert False

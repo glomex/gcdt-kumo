@@ -14,7 +14,7 @@ from troposphere.ec2 import Instance
 from troposphere.route53 import RecordSetType
 from gcdt.utils import get_env
 from gcdt.servicediscovery import get_outputs_for_stack
-from gcdt import GcdtError
+from gcdt.gcdt_exceptions import GcdtError
 
 TTL_DEFAULT = 300
 HOST_ZONE_NAME__STACK_OUTPUT_NAME = "internalDomainName"
