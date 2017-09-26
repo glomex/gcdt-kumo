@@ -9,6 +9,7 @@ import random
 import string
 import sys
 import time
+import uuid
 
 from clint.textui import colored
 from funcsigs import signature  # python3 only: from inspect import signature
@@ -42,7 +43,8 @@ def load_cloudformation_template(path=None):
             sp = sys.path
             # temporarily add folder to allow relative path
             sys.path.append(os.path.abspath(os.path.dirname(path)))
-            cloudformation = imp.load_source('cloudformation', path)
+
+            cloudformation = imp.load_source('cloudformation%s' % uuid.uuid1(), path)
             sys.path = sp  # restore
             # use cfn template hooks
             #if not check_hook_mechanism_is_intact(cloudformation):
