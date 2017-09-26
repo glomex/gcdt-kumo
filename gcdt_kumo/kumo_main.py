@@ -18,12 +18,15 @@ from pyspin.spin import Default, Spinner
 from gcdt import utils
 from gcdt.gcdt_cmd_dispatcher import cmd
 from gcdt import gcdt_lifecycle
+from gcdt.gcdt_logging import getLogger
 
 from .kumo_core import get_parameter_diff, delete_stack, \
     deploy_stack, write_template_to_file, list_stacks, create_change_set, \
     describe_change_set, load_cloudformation_template, \
     generate_template, stop_stack, start_stack  #call_pre_hook
 from .kumo_viz import cfn_viz, svg_output
+
+log = getLogger(__name__)
 
 
 # creating docopt parameters and usage help
@@ -48,7 +51,7 @@ def load_template():
     """
     cloudformation, found = load_cloudformation_template()
     if not found:
-        print(colored.red('could not load cloudformation.py, bailing out...'))
+        log.error('could not load cloudformation.py, bailing out...')
         sys.exit(1)
     return cloudformation
 

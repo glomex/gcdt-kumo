@@ -20,7 +20,6 @@ from gcdt.utils import GracefulExit, json2table, dict_selective_merge, all_pages
 #from gcdt.gcdt_signals import check_hook_mechanism_is_intact, \
 #    check_register_present
 from gcdt.s3 import upload_file_to_s3
-#from gcdt import GcdtError
 
 
 log = getLogger(__name__)
@@ -58,11 +57,12 @@ def load_cloudformation_template(path=None):
         except GracefulExit:
             raise
         except ImportError as e:
-            print('could not find package for import: %s' % e)
+            log.error('could not find package for import: %s' % e)
         except Exception as e:
-            print('could not import cloudformation.py, maybe something wrong ',
-                  'with your code?')
-            print(e)
+            log.error('could not import cloudformation.py, maybe something is' +
+                  'wrong with your code?')
+            log.exception(e)
+            log.debug(str(e), exc_info=True)  # this adds the traceback
     return None, False
 
 
